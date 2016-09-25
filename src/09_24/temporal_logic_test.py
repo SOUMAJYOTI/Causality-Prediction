@@ -6,7 +6,6 @@ import pylab
 import pickle
 import os
 import pandas as pd
-import VAR_MVGC as vm
 import statsmodels.tsa.api as sta
 import math
 import statsmodels.tsa.stattools as sts
