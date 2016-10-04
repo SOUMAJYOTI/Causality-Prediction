@@ -1,4 +1,5 @@
 # Use some existing time series data to test PCTLc logic by Samantha Kleinberg
+# Fix the window time here ( |r - s| is fixed here).
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -42,7 +43,7 @@ def test_stationarity(timeseries):
     return dfoutput[2]
 
 if __name__ == '__main__':
-    measure_file_path = 'F://Inhibition//VAR_causality//data_files//measure_series//inhib//v1'
+    measure_file_path = 'F://Github//Causality-Prediction//data//measure_series//inhib//v2'
     steep_inhib_times = pickle.load(open('F://Inhibition//VAR_causality//data_files//steep_inhib_times.pickle', 'rb'))
 
     dependent_variables = []
@@ -104,6 +105,7 @@ if __name__ == '__main__':
                     measure_series_all.append(list(cascade_df_feat[measures[subset[idx]]]))
 
                 Y_act = [0 for idx in range(len(time_series))]
+                Y_time = []
 
                 for idx in range(1, len(time_series)):
                     rt_time = str(time_series[idx])
@@ -140,7 +142,7 @@ if __name__ == '__main__':
                 for idx_sub in range(len(subset)):
                     cascade_ts_df[measures[subset[idx_sub]]] = X[idx_sub]
 
-                # Step 3: Add additional m lags from order of integration into the VAR model
+                # Step 3: Remove the NaN values from the df.
                 Y_diff = []
                 X_diff = [[] for i in range(len(subset))]
                 for idx in range(len(Y)):
@@ -158,4 +160,9 @@ if __name__ == '__main__':
                 for idx_sub in range(len(subset)):
                     cascade_VAR_df[measures[subset[idx_sub]]] = X[idx_sub,:]
 
-                print(X)
+                print(cascade_ts_df)
+
+
+                cnt_mids += 1
+                if cnt_mids > 1:
+                    break
