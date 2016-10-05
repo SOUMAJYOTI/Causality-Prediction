@@ -10,7 +10,7 @@ import pandas as pd
 import statsmodels.tsa.api as sta
 import math
 import statsmodels.tsa.stattools as sts
-from datetime import datetime
+import datetime
 import time
 import math
 import statistics as st
@@ -29,9 +29,12 @@ class TLogic:
     def __init__(self, data, measures):
         self.cascade_df = data
         self.measures = measures
+        self.cascade_df['time_date']= pd.to_datetime(self.cascade_df['time_date'], format='%Y-%m-%d %H:%M:%S')
+
 
     def dynamic_intervals(self, start, delta_t):
         mean_series = np.mean(self.cascade_df[self.measures[0]])
+        self.cascade_df.index = pd.to_datetime(self.cascade_df.index, format='%Y-%m-%d %H:%M:%S')
         startPoint = 0
         endPoint = 0
         dnIntervals = []
@@ -47,22 +50,60 @@ class TLogic:
         print(self.cascade_df)
 
     def rules_formulas(self, delta_t, lag):
-        mean_measure_value = np.mean(self.cascade_df[self.measures[0]]) / 2
-        startPoint = 0
-        endPoint = startPoint + delta_t
+        time_points = self.cascade_df['time_date'].tolist()
+        mean_measure_value = np.mean(self.cascade_df[self.measures[0]]) / 3
+        startPoint = time_points[0]
+        endPoint = startPoint + datetime.timedelta(minutes=delta_t)
+        start_mark = 0
+        start_idx = 0
         dnIntervals = []
-        while endPoint < len(self.cascade_df[self.measures[0]]):
+        while endPoint < time_points[len(time_points)-1]:
             # check for statisfaction of formula 1
-            while startPoint < endPoint:
-                if self.cascade_df[self.measures[0]][endPoint] < mean_measure_value:
-                    startPoint = endPoint+1
-                    endPoint += 1
+            while startPoint < endPoint and endPoint < time_points[len(time_points)-1]:
+                if self.cascade_df[self.measures[0]][start_idx] < mean_measure_value:
+                    # startPoint = endPoint+1
+                    # endPoint += 1
+                    startPoint = time_series[start_idx+1]
+                    endPoint = startPoint + datetime.timedelta(minutes=delta_t)
                     break
+                start_idx += 1
+                if start_idx >= len (time_points):
+                    break
+                startPoint = time_series[start_idx]
 
             # check for satisfaction of formula 2
-            if startPoint == endPoint:
-                
+            if startPoint >= endPoint:
+                start_date = time_points[start_mark] + datetime.timedelta(minutes=lag) - datetime.timedelta(minutes=delta_t)
+                start_date = pd.to_datetime(start_date)
+                end_date = pd.to_datetime(time_points[start_mark] + datetime.timedelta(minutes=lag))
 
+                # try:
+                num_shares_first = self.cascade_df[self.cascade_df['time_date'] >= start_date]
+                num_shares_first = num_shares_first[num_shares_first['time_date'] < end_date]
+
+                start_date = time_points[start_mark] + datetime.timedelta(minutes=lag)
+                start_date = pd.to_datetime(start_date)
+                end_date = pd.to_datetime(
+                    time_points[start_mark] + datetime.timedelta(minutes=lag) + datetime.timedelta(minutes=delta_t),
+                    format='%Y-%m-%d %H:%M:%S')
+
+                try:
+                    num_shares_second = self.cascade_df[self.cascade_df['time_date'] >= start_date]
+                    num_shares_second = num_shares_second[num_shares_second['time_date'] < end_date]
+                    if num_shares_first / num_shares_second >= 6:
+                        dnIntervals.append(time_series[start_mark], endPoint)
+                    print(len(num_shares_first), len(num_shares_second))
+                except:
+                    pass
+
+
+
+                startPoint = endPoint
+                endPoint += datetime.timedelta(minutes=delta_t)
+            start_idx += 1
+            start_mark = start_idx
+            if start_idx >= len (time_points):
+                break
 
 
 if __name__ == '__main__':
@@ -135,14 +176,14 @@ if __name__ == '__main__':
                     rt_date = rt_time[:10]
                     rt_t = rt_time[11:19]
                     record_time = rt_date + ' ' + rt_t
-                    time_x = datetime.strptime(record_time, '%Y-%m-%d %H:%M:%S')
+                    time_x = datetime.datetime.strptime(record_time, '%Y-%m-%d %H:%M:%S')
                     cur_time = time.mktime(time_x.timetuple())
 
                     rt_time = str(time_series[idx-1])
                     rt_date = rt_time[:10]
                     rt_t = rt_time[11:19]
                     record_time = rt_date + ' ' + rt_t
-                    time_x = datetime.strptime(record_time, '%Y-%m-%d %H:%M:%S')
+                    time_x = datetime.datetime.strptime(record_time, '%Y-%m-%d %H:%M:%S')
                     prev_time = time.mktime(time_x.timetuple())
 
                     Y_act[idx] = (cur_time - prev_time)/60
@@ -169,7 +210,7 @@ if __name__ == '__main__':
 
                 cascade_ts_df = pd.DataFrame()
                 cascade_ts_df['time_diff'] = Y
-                cascade_ts_df.index = time_new
+                cascade_ts_df['time_date']= time_new
                 for idx_sub in range(len(subset)):
                     cascade_ts_df[measures[subset[idx_sub]]] = X[idx_sub]
                     cascade_ts_df[measures[subset[idx_sub]] + '_ratios'] = measures_ratios[idx_sub]
@@ -208,7 +249,7 @@ if __name__ == '__main__':
                 # plt.plot(range(len(cascade_ts_df.index)), cascade_ts_df['pr_ratios'])
                 # plt.show()
                 temporal_logic = TLogic(cascade_ts_df, measures)
-                temporal_logic.dynamic_intervals(0, 1)
+                temporal_logic.rules_formulas(200, 500)
 
                 cnt_mids += 1
                 if cnt_mids > 0:
