@@ -30,7 +30,7 @@ class TLogic:
         self.cascade_df = data
         self.measures = measures
         self.cascade_df['time_date']= pd.to_datetime(self.cascade_df['time_date'], format='%Y-%m-%d %H:%M:%S')
-
+        self.cascade_df = self.cascade_df.reset_index(drop=True)
 
     def dynamic_intervals(self, start, delta_t):
         mean_series = np.mean(self.cascade_df[self.measures[0]])
@@ -51,25 +51,26 @@ class TLogic:
 
     def rules_formulas(self, delta_t, lag):
         time_points = self.cascade_df['time_date'].tolist()
-        mean_measure_value = np.mean(self.cascade_df[self.measures[0]]) / 3
+        mean_measure_value = np.mean(self.cascade_df[self.measures[0]]) / 2
         startPoint = time_points[0]
         endPoint = startPoint + datetime.timedelta(minutes=delta_t)
         start_mark = 0
         start_idx = 0
-        dnIntervals = []
+        self.dnIntervals_cause = []
+        self.dnIntervals_effect = []
         while endPoint < time_points[len(time_points)-1]:
             # check for statisfaction of formula 1
             while startPoint < endPoint and endPoint < time_points[len(time_points)-1]:
                 if self.cascade_df[self.measures[0]][start_idx] < mean_measure_value:
-                    # startPoint = endPoint+1
-                    # endPoint += 1
-                    startPoint = time_series[start_idx+1]
+                    if start_idx+1 >= len(time_points):
+                        break
+                    startPoint = time_points[start_idx+1]
                     endPoint = startPoint + datetime.timedelta(minutes=delta_t)
                     break
                 start_idx += 1
-                if start_idx >= len (time_points):
+                if start_idx >= len(time_points):
                     break
-                startPoint = time_series[start_idx]
+                startPoint = time_points[start_idx]
 
             # check for satisfaction of formula 2
             if startPoint >= endPoint:
@@ -90,12 +91,18 @@ class TLogic:
                 try:
                     num_shares_second = self.cascade_df[self.cascade_df['time_date'] >= start_date]
                     num_shares_second = num_shares_second[num_shares_second['time_date'] < end_date]
-                    if num_shares_first / num_shares_second >= 6:
-                        dnIntervals.append(time_series[start_mark], endPoint)
                     print(len(num_shares_first), len(num_shares_second))
+                    if len(num_shares_first) / len(num_shares_second) >= 6:
+
+                        e_start = num_shares_second.index
+                        e_end = num_shares_second.index[len(num_shares_second) - 1]
+
+                        print(e_start, e_end)
+                        self.dnIntervals_cause.append((start_mark, start_idx))
+                        self.dnIntervals_effect.append((e_start, e_end))
+                        # print(len(num_shares_first), len(num_shares_second))
                 except:
                     pass
-
 
 
                 startPoint = endPoint
@@ -104,6 +111,10 @@ class TLogic:
             start_mark = start_idx
             if start_idx >= len (time_points):
                 break
+        print(self.dnIntervals_cause)
+        print(self.dnIntervals_effect)
+
+    # def eta_avg(self):
 
 
 if __name__ == '__main__':
