@@ -18,29 +18,52 @@ import statsmodels.stats.stattools as ssts
 import seaborn
 import itertools
 
-def test_stationarity(timeseries):
+class DataProcess:
+    def __init__(selfself, mfile, tfile):
+        measure_file_path = 'F://Github//Causality-Prediction//data//measure_series//inhib//v2'
+        steep_inhib_times = pickle.load(
+            open('F://Inhibition//VAR_causality//data_files//steep_inhib_times.pickle', 'rb'))
 
-    #Determing rolling statistics
-    rolmean = pd.rolling_mean(timeseries, window=12)
-    rolstd = pd.rolling_std(timeseries, window=12)
 
-    #Plot rolling statistics:
-    # plt.close()
-    # orig = plt.plot(timeseries, color='blue',label='Original')
-    # mean = plt.plot(rolmean, color='red', label='Rolling Mean')
-    # std = plt.plot(rolstd, color='black', label = 'Rolling Std')
-    # plt.legend(loc='best')
-    # plt.title('Rolling Mean & Standard Deviation')
-    # plt.show()
+class TLogic:
+    def __init__(self, data, measures):
+        self.cascade_df = data
+        self.measures = measures
 
-    #Perform Dickey-Fuller test:
-    # print('Results of Dickey-Fuller Test:')
-    dftest = sts.adfuller(timeseries, autolag='AIC')
-    dfoutput = pd.Series(dftest[0:4], index=['Test Statistic','p-value','#Lags Used','Number of Observations Used'])
-    # for key,value in dftest[4].items():
-    #     dfoutput['Critical Value (%s)'%key] = value
-    # print(dfoutput)
-    return dfoutput[2]
+    def dynamic_intervals(self, start, delta_t):
+        mean_series = np.mean(self.cascade_df[self.measures[0]])
+        startPoint = 0
+        endPoint = 0
+        dnIntervals = []
+        while endPoint < len(self.cascade_df[self.measures[0]]):
+            if self.cascade_df[self.measures[0]][endPoint] >= mean_series:
+                endPoint += 1
+            else:
+                tInt = (startPoint, endPoint)
+                dnIntervals.append(tInt)
+                endPoint += 1
+                startPoint = endPoint
+
+        print(self.cascade_df)
+
+    def rules_formulas(self, delta_t, lag):
+        mean_measure_value = np.mean(self.cascade_df[self.measures[0]]) / 2
+        startPoint = 0
+        endPoint = startPoint + delta_t
+        dnIntervals = []
+        while endPoint < len(self.cascade_df[self.measures[0]]):
+            # check for statisfaction of formula 1
+            while startPoint < endPoint:
+                if self.cascade_df[self.measures[0]][endPoint] < mean_measure_value:
+                    startPoint = endPoint+1
+                    endPoint += 1
+                    break
+
+            # check for satisfaction of formula 2
+            if startPoint == endPoint:
+                
+
+
 
 if __name__ == '__main__':
     measure_file_path = 'F://Github//Causality-Prediction//data//measure_series//inhib//v2'
@@ -75,7 +98,7 @@ if __name__ == '__main__':
     critical_values = {}
     granger_cause_count = {}
 
-    for L in range(0, len(range(len(measures))) + 1):
+    for L in range(0, 2):
         for subset in itertools.combinations(range(len(measures)), L):
             num_measures = len(subset)
             if num_measures == 0:
@@ -96,9 +119,9 @@ if __name__ == '__main__':
                     # if measures[subset[idx]] == 'bw' or measures[subset[idx]] == 'cc':
                     cascade_df_feat[measures[subset[idx]]] = measure_time_df[subset[idx]][mid][measures[subset[idx]]]
                 cascade_df_feat = cascade_df_feat.sort('time')
-                cascade_df_feat = cascade_df_feat[cascade_df_feat['time'] < pd.to_datetime(inhib_time)]
+                #cascade_df_feat = cascade_df_feat[cascade_df_feat['time'] < pd.to_datetime(inhib_time)]
 
-                # print(cascade_df_feat)
+                # print(cascade_df_eat)
                 time_series = list(cascade_df_feat['time'])
                 measure_series_all = []
                 for idx in range(num_measures):
@@ -127,42 +150,66 @@ if __name__ == '__main__':
                 X = [[] for i in range(len(subset))]
                 Y = []
                 time_new = []
+                measures_ratios = [[] for i in range(len(subset))]
                 # Remove the time_series rows with values of \delta t=0
                 for idx in range(len(Y_act)):
-                    if Y_act[idx] == 0 and idx > 0:
-                        continue
+                    # if Y_act[idx] == 0 and idx > 0:
+                    #     continue
+                    # measures_ratios[idx_sub].append(1)
                     for idx_sub in range(len(subset)):
                         X[idx_sub].append(measure_series_all[idx_sub][idx])
+                        if idx > 0:
+                            measures_ratios[idx_sub].append(measure_series_all[idx_sub][idx] / measure_series_all[idx_sub][idx-1])
+                        else:
+                            measures_ratios[idx_sub].append(1)
+                        # print(measures_ratios[idx_sub])
                     Y.append(Y_act[idx])
                     time_new.append(time_series[idx])
+
 
                 cascade_ts_df = pd.DataFrame()
                 cascade_ts_df['time_diff'] = Y
                 cascade_ts_df.index = time_new
                 for idx_sub in range(len(subset)):
                     cascade_ts_df[measures[subset[idx_sub]]] = X[idx_sub]
+                    cascade_ts_df[measures[subset[idx_sub]] + '_ratios'] = measures_ratios[idx_sub]
+                s = cascade_ts_df.shape
+                cascade_ts_df = cascade_ts_df.fillna(0)
 
+                # print(cascade_ts_df)
+                # print(cascade_ts_df.shape)
                 # Step 3: Remove the NaN values from the df.
-                Y_diff = []
-                X_diff = [[] for i in range(len(subset))]
-                for idx in range(len(Y)):
-                    if np.isnan(Y[idx]):
-                       continue
-                    Y_diff.append(Y[idx])
-                    for idx_sub in range(len(subset)):
-                        X_diff[idx_sub].append(X[idx_sub][idx])
+                # Y_diff = []
+                # X_diff = [[] for i in range(len(subset))]
+                # for idx in range(len(Y)):
+                #     if np.isnan(Y[idx]):
+                #        continue
+                #     Y_diff.append(Y[idx])
+                #     for idx_sub in range(len(subset)):
+                #         X_diff[idx_sub].append(X[idx_sub][idx])
 
-                X = np.asarray(X_diff)
-                Y = np.asarray(Y_diff)
+                # X = np.asarray(X_diff)
+                # Y = np.asarray(Y_diff)
+                #
+                # cascade_VAR_df = pd.DataFrame()
+                # cascade_VAR_df['time_diff'] = Y
+                # for idx_sub in range(len(subset)):
+                #     cascade_VAR_df[measures[subset[idx_sub]]] = X[idx_sub,:]
 
-                cascade_VAR_df = pd.DataFrame()
-                cascade_VAR_df['time_diff'] = Y
-                for idx_sub in range(len(subset)):
-                    cascade_VAR_df[measures[subset[idx_sub]]] = X[idx_sub,:]
+                # measures_causality = []
+                # measures_string = ''
+                # for idx_sub in range(len(subset)):
+                #     measures_causality.append(measures[subset[idx_sub]])
+                #     measures_string += (measures[subset[idx_sub]] + ' + ')
+                # measures_string = measures_string[:len(measures_string) - 3]
 
-                print(cascade_ts_df)
+                # print(cascade_ts_df)
 
+                # plt.plot(range(len(cascade_ts_df.index)), cascade_ts_df['pr_ratios'])
+                # plt.show()
+                temporal_logic = TLogic(cascade_ts_df, measures)
+                temporal_logic.dynamic_intervals(0, 1)
 
                 cnt_mids += 1
-                if cnt_mids > 1:
+                if cnt_mids > 0:
                     break
