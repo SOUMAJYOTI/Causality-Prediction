@@ -59,7 +59,7 @@ class TLogic:
         time_points = self.cascade_df['time_date'].tolist()
         for idx_measures in range(len(self.measures)):
             # print(self.measures[idx_measures])
-            mean_measure_value = np.mean(self.cascade_df[self.measures[idx_measures]]) / 3
+            mean_measure_value = np.mean(self.cascade_df[self.measures[idx_measures]]) / 5
             startPoint = time_points[0]
             endPoint = startPoint + datetime.timedelta(minutes=delta_t)
             start_mark = 0
@@ -99,7 +99,7 @@ class TLogic:
                     num_shares_second = num_shares_second[num_shares_second['time_date'] < end_date]
                     try:
                         # print(len(num_shares_first), len(num_shares_second))
-                        if len(num_shares_first) / len(num_shares_second) >= 3:
+                        if len(num_shares_first) / len(num_shares_second) >= 4:
 
                             e_start = num_shares_second.index[0]
                             e_end = num_shares_second.index[len(num_shares_second) - 1]
@@ -125,15 +125,16 @@ class TLogic:
             cause_prime = self.dnIntervals_cause[self.measures[idx_measures]]
             effect_prime = self.dnIntervals_effect[self.measures[idx_measures]]
             for idx_cause in range(len(cause_prime)):
+                c_prime = cause_prime[idx_cause]
                 for idx_nest in range(len(self.measures)):
                     if idx_nest == idx_measures:
                         continue
                     cause_second = self.dnIntervals_cause[self.measures[idx_nest]]
                     effect_second = self.dnIntervals_effect[self.measures[idx_nest]]
 
-
-
-
+                    for idx_cause_sec in range(len(cause_second)):
+                        c_second = cause_second[idx_cause_sec]
+                        if c_second[0] >= c_prime[0] and cause_second[1] <= cause_prime[1]:
 
 
 if __name__ == '__main__':
