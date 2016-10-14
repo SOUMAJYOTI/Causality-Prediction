@@ -55,7 +55,10 @@ class TLogic:
 
         print(self.cascade_df)
 
+
+    # monitor the time series using Signal Temporal Logic
     def rules_formulas(self, delta_t, lag):
+
         time_points = self.cascade_df['time_date'].tolist()
         for idx_measures in range(len(self.measures)):
             # print(self.measures[idx_measures])
