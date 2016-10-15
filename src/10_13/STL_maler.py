@@ -18,6 +18,7 @@ import statsmodels.stats.stattools as ssts
 import seaborn
 import itertools
 
+time_diff_ratio_list = []
 class DataProcess:
     def __init__(selfself, mfile, tfile):
         measure_file_path = 'F://Github//Causality-Prediction//data//measure_series//inhib//v2'
@@ -38,12 +39,13 @@ class TLogic:
             self.dnIntervals_cause[self.measures[idx]] = []
 
     def dynamic_intervals(self, r, s):
-        mean_series = np.mean(self.cascade_df[self.measures[0]])
+        mean_series = np.mean(self.cascade_df[self.measures[0]]) /2
         self.cascade_df.index = pd.to_datetime(self.cascade_df.index, format='%Y-%m-%d %H:%M:%S')
-        print(self.cascade_df)
+        # print(len(self.cascade_df))
+        # print(self.cascade_df)
         startPoint = 0
         endPoint = 0
-        dnIntervals = []
+        dnIntervals_cause = []
         for idx_m in range(len(self.measures)):
             time_points = self.cascade_df['time_date'].tolist()
 
@@ -59,15 +61,49 @@ class TLogic:
                     # print('Start_time: ', t_points)
 
                     idx_cur = t_series
-                    for idx_cur in range(t_series, t_points):
+                    for idx_cur in range(t_series, t_points+1):
                         # print(self.cascade_df[self.measures[0]][idx_cur], mean_series)
                         if self.cascade_df[self.measures[0]][idx_cur] <= mean_series:
                             break
-                    if idx_cur == t_points-1:
-                        print(time_points[t_series], time_points[t_points])
-                        dnIntervals.append((t_series, t_points))
+                    if idx_cur == t_points:
+                        # print('Cause: ', time_points[t_series], time_points[t_points])
+                        dnIntervals_cause.append((t_series, t_points))
 
-            # check whether the first formula is satisfied
+                        time_diff_cur = self.cascade_df['time_diff'][idx_cur]
+                        time_diff_prev = self.cascade_df['time_diff'][idx_cur-1]
+
+                        # print('Time_diff ratio: ', time_diff_cur/time_diff_prev)
+                        if time_diff_prev !=0 and (time_diff_cur/time_diff_prev) <= 5:
+                            time_diff_ratio_list.append(time_diff_cur/time_diff_prev)
+
+        mean_series = np.mean(self.cascade_df['time_diff']) / 2
+        # print(self.cascade_df)
+        startPoint = 0
+        endPoint = 0
+        dnIntervals_effect = []
+        for idx_m in range(len(self.measures)):
+            time_points = self.cascade_df['time_date'].tolist()
+
+            # check whether the second formula is satisfied
+            # This part is to check whether the feature traces satisfy the
+            # behaviors laid down by STL semantics.
+
+            for t_series in range(len(time_points)):
+                # print('Time point: ', t_series)
+                if t_series + s >= len(time_points):
+                    break
+                for t_points in range(t_series + r, t_series + s):
+                    # print('Start_time: ', t_points)
+
+                    idx_cur = t_series
+                    for idx_cur in range(t_series, t_points):
+                        # print(self.cascade_df[self.measures[0]][idx_cur], mean_series)
+                        if self.cascade_df['time_diff'][idx_cur] <= mean_series:
+                            break
+                    if idx_cur == t_points - 1:
+                        # print('Effect: ', time_points[t_series], time_points[t_points])
+                        dnIntervals_effect.append((t_series, t_points))
+                        # check whether the first formula is satisfied
             # This part is to check whether the feature traces satisfy the
             # behaviors laid down by STL semantics.
             # for t_series in range(len(time_points)):
@@ -129,17 +165,15 @@ if __name__ == '__main__':
             if num_measures == 0:
                 continue
             measure_series = []
-            cascade_df_feat = pd.DataFrame()
             cnt_mids = 0
             for mid in measure_time_df[0]:
+                cascade_df_feat = pd.DataFrame()
                 steep_time = pd.to_datetime(steep_inhib_times[mid]['steep'])
                 inhib_time = pd.to_datetime(steep_inhib_times[mid]['decay'])
                 # print(inhib_time)
                 # Combine all the features in a dataframe for sorting them by time.
                 cascade_df = measure_time_df[0][mid]
                 cascade_df_feat['time'] = pd.to_datetime(cascade_df['time'])
-                cascade_df_feat['time'] = pd.to_datetime(cascade_df['time'])
-
                 for idx in range(num_measures):
                     # if measures[subset[idx]] == 'bw' or measures[subset[idx]] == 'cc':
                     cascade_df_feat[measures[subset[idx]]] = measure_time_df[subset[idx]][mid][measures[subset[idx]]]
@@ -147,7 +181,7 @@ if __name__ == '__main__':
                 cascade_df_feat = cascade_df_feat.dropna()
                 #cascade_df_feat = cascade_df_feat[cascade_df_feat['time'] < pd.to_datetime(inhib_time)]
 
-                # print(cascade_df_eat)
+                # print(len(cascade_df_feat))
                 time_series = list(cascade_df_feat['time'])
                 measure_series_all = []
                 for idx in range(num_measures):
@@ -223,46 +257,23 @@ if __name__ == '__main__':
                 for idx_sub in range(len(subset)):
                     # print(measures[subset[idx_sub]])
                     cascade_VAR_df[measures[subset[idx_sub]]] = X[idx_sub, :]
-
-                # print(cascade_VAR_df)
-                # print(cascade_ts_df)
-                # print(cascade_ts_df.shape)
-                # Step 3: Remove the NaN values from the df.
-                # Y_diff = []
-                # X_diff = [[] for i in range(len(subset))]
-                # for idx in range(len(Y)):
-                #     if np.isnan(Y[idx]):
-                #        continue
-                #     Y_diff.append(Y[idx])
-                #     for idx_sub in range(len(subset)):
-                #         X_diff[idx_sub].append(X[idx_sub][idx])
-
-                # X = np.asarray(X_diff)
-                # Y = np.asarray(Y_diff)
-                #
-                # cascade_VAR_df = pd.DataFrame()
-                # cascade_VAR_df['time_diff'] = Y
-                # for idx_sub in range(len(subset)):
-                #     cascade_VAR_df[measures[subset[idx_sub]]] = X[idx_sub,:]
-
-                # measures_causality = []
-                # measures_string = ''
-                # for idx_sub in range(len(subset)):
-                #     measures_causality.append(measures[subset[idx_sub]])
-                #     measures_string += (measures[subset[idx_sub]] + ' + ')
-                # measures_string = measures_string[:len(measures_string) - 3]
-
-                # print(cascade_ts_df)
-
-                # plt.plot(range(len(cascade_ts_df.index)), cascade_ts_df['pr_ratios'])
-                # plt.show()
-
+                    
                 cnt_mids += 1
-                temporal_logic = TLogic(cascade_ts_df, measures)
-                temporal_logic.dynamic_intervals(5, 25)
-                # temporal_logic.rules_formulas(50, 150)
-                # temporal_logic.eta_avg()
+                if True: #cnt_mids == 100:
+                    temporal_logic = TLogic(cascade_ts_df, measures)
+                    temporal_logic.dynamic_intervals(5, 15)
+                    # temporal_logic.rules_formulas(50, 150)
+                    # temporal_logic.eta_avg()
                 print('Mid: ', cnt_mids)
-                if cnt_mids > 3:
+                if cnt_mids > 100:
                     break
+
+    # print(len(time_diff_ratio_list))
+    n, bins, patches = plt.hist(time_diff_ratio_list, 30, facecolor='g')
+    plt.xlabel('Time diff')
+    plt.ylabel('Frequency')
+    # plt.title('Histogram of User activity Times')
+    plt.grid(True)
+    plt.show()
+    # plt.savefig('Cascade_figures/trash/user_activity_histogram.png')
 
