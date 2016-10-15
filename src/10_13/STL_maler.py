@@ -38,22 +38,26 @@ class TLogic:
             self.dnIntervals_cause[self.measures[idx]] = []
 
     def dynamic_intervals(self, r, s):
-        mean_series = np.mean(self.cascade_df[self.measures[0]]) /3
+        mean_series = np.mean(self.cascade_df[self.measures[0]])
         self.cascade_df.index = pd.to_datetime(self.cascade_df.index, format='%Y-%m-%d %H:%M:%S')
-        # if sel
-        # print(self.cascade_df)
+        print(self.cascade_df)
         startPoint = 0
         endPoint = 0
         dnIntervals = []
         for idx_m in range(len(self.measures)):
             time_points = self.cascade_df['time_date'].tolist()
+
+            # check whether the first formula is satisfied
+            # This part is to check whether the feature traces satisfy the
+            # behaviors laid down by STL semantics.
+
             for t_series in range(len(time_points)):
                 # print('Time point: ', t_series)
                 if t_series+s >= len(time_points):
                     break
                 for t_points in range(t_series+r, t_series+s):
                     # print('Start_time: ', t_points)
-                    #check whether the first formula is satisfied
+
                     idx_cur = t_series
                     for idx_cur in range(t_series, t_points):
                         # print(self.cascade_df[self.measures[0]][idx_cur], mean_series)
@@ -61,75 +65,13 @@ class TLogic:
                             break
                     if idx_cur == t_points-1:
                         print(time_points[t_series], time_points[t_points])
+                        dnIntervals.append((t_series, t_points))
 
-
-
-    # monitor the time series using Signal Temporal Logic
-    def rules_formulas(self, delta_t, lag):
-
-        time_points = self.cascade_df['time_date'].tolist()
-        for idx_measures in range(len(self.measures)):
-            # print(self.measures[idx_measures])
-            mean_measure_value = np.mean(self.cascade_df[self.measures[idx_measures]]) / 5
-            startPoint = time_points[0]
-            endPoint = startPoint + datetime.timedelta(minutes=delta_t)
-            start_mark = 0
-            start_idx = 0
-
-            while endPoint < time_points[len(time_points)-1]:
-                # check for statisfaction of formula 1
-                while startPoint < endPoint and endPoint < time_points[len(time_points)-1]:
-                    # print(self.cascade_df[self.measures[idx_measures]][start_idx], mean_measure_value)
-                    if self.cascade_df[self.measures[idx_measures]][start_idx] < mean_measure_value:
-                        if start_idx+1 >= len(time_points):
-                            break
-                        startPoint = time_points[start_idx+1]
-                        endPoint = startPoint + datetime.timedelta(minutes=delta_t)
-                        break
-                    start_idx += 1
-                    if start_idx >= len(time_points):
-                        break
-                    startPoint = time_points[start_idx]
-
-                # check for satisfaction of formula 2
-                if startPoint >= endPoint:
-                    start_date = time_points[start_mark] + datetime.timedelta(minutes=lag) - datetime.timedelta(minutes=delta_t)
-                    start_date = pd.to_datetime(start_date)
-                    end_date = pd.to_datetime(time_points[start_mark] + datetime.timedelta(minutes=lag))
-
-                    # try:
-                    num_shares_first = self.cascade_df[self.cascade_df['time_date'] >= start_date]
-                    num_shares_first = num_shares_first[num_shares_first['time_date'] < end_date]
-
-                    start_date = time_points[start_mark] + datetime.timedelta(minutes=lag)
-                    start_date = pd.to_datetime(start_date)
-                    end_date = pd.to_datetime(
-                        time_points[start_mark] + datetime.timedelta(minutes=lag) + datetime.timedelta(minutes=delta_t),
-                        format='%Y-%m-%d %H:%M:%S')
-                    num_shares_second = self.cascade_df[self.cascade_df['time_date'] >= start_date]
-                    num_shares_second = num_shares_second[num_shares_second['time_date'] < end_date]
-                    try:
-                        # print(len(num_shares_first), len(num_shares_second))
-                        if len(num_shares_first) / len(num_shares_second) >= 4:
-
-                            e_start = num_shares_second.index[0]
-                            e_end = num_shares_second.index[len(num_shares_second) - 1]
-
-                            self.dnIntervals_cause[self.measures[idx_measures]].append((start_mark, start_idx))
-                            self.dnIntervals_effect[self.measures[idx_measures]].append((e_start, e_end))
-                            # print(len(num_shares_first), len(num_shares_second))
-                    except:
-                        pass
-
-
-                    startPoint = endPoint
-                    endPoint += datetime.timedelta(minutes=delta_t)
-                start_idx += 1
-                start_mark = start_idx
-                if start_idx >= len (time_points):
-                    break
-        # print(self.dnIntervals_cause)
-        # print(self.dnIntervals_effect)
+            # check whether the first formula is satisfied
+            # This part is to check whether the feature traces satisfy the
+            # behaviors laid down by STL semantics.
+            # for t_series in range(len(time_points)):
+            #     if t_series + s>=
 
     def eta_avg(self):
         for idx_measures in range(len(self.measures)):
@@ -317,10 +259,10 @@ if __name__ == '__main__':
 
                 cnt_mids += 1
                 temporal_logic = TLogic(cascade_ts_df, measures)
-                temporal_logic.dynamic_intervals(5, 15)
+                temporal_logic.dynamic_intervals(5, 25)
                 # temporal_logic.rules_formulas(50, 150)
                 # temporal_logic.eta_avg()
                 print('Mid: ', cnt_mids)
-                if cnt_mids > 0:
+                if cnt_mids > 3:
                     break
 
