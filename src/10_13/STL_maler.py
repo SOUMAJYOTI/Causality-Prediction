@@ -19,6 +19,8 @@ import seaborn
 import itertools
 
 time_diff_ratio_list = []
+
+
 class DataProcess:
     def __init__(selfself, mfile, tfile):
         measure_file_path = 'F://Github//Causality-Prediction//data//measure_series//inhib//v2'
@@ -32,20 +34,20 @@ class TLogic:
         self.measures = measures
         self.cascade_df['time_date']= pd.to_datetime(self.cascade_df['time_date'], format='%Y-%m-%d %H:%M:%S')
         self.cascade_df = self.cascade_df.reset_index(drop=True)
-        self.dnIntervals_cause = {}
+        self.dnIntervals_cause_increase = []
+        self.dnIntervals_cause_decrease = []
         self.dnIntervals_effect = {}
         for idx in range(len(self.measures)):
             self.dnIntervals_effect[self.measures[idx]] = []
             self.dnIntervals_cause[self.measures[idx]] = []
 
-    def dynamic_intervals(self, r, s):
+    def dynamic_intervals(self, r, s, lag):
         mean_series = np.mean(self.cascade_df[self.measures[0]]) /2
         self.cascade_df.index = pd.to_datetime(self.cascade_df.index, format='%Y-%m-%d %H:%M:%S')
         # print(len(self.cascade_df))
-        # print(self.cascade_df)
         startPoint = 0
         endPoint = 0
-        dnIntervals_cause = []
+
         for idx_m in range(len(self.measures)):
             time_points = self.cascade_df['time_date'].tolist()
 
@@ -59,55 +61,35 @@ class TLogic:
                     break
                 for t_points in range(t_series+r, t_series+s):
                     # print('Start_time: ', t_points)
+                    if t_series-r < 0:
+                        break
+                    mean_interval = np.mean(self.cascade_df[self.measures[0]][t_series-r:t_series-r+s])
 
                     idx_cur = t_series
                     for idx_cur in range(t_series, t_points+1):
                         # print(self.cascade_df[self.measures[0]][idx_cur], mean_series)
-                        if self.cascade_df[self.measures[0]][idx_cur] <= mean_series:
+                        if self.cascade_df[self.measures[0]][idx_cur] <= mean_interval:
                             break
                     if idx_cur == t_points:
-                        # print('Cause: ', time_points[t_series], time_points[t_points])
-                        dnIntervals_cause.append((t_series, t_points))
 
-                        time_diff_cur = self.cascade_df['time_diff'][idx_cur]
-                        time_diff_prev = self.cascade_df['time_diff'][idx_cur-1]
+                        #the second formula pertains to the effect - not considering it right now !!!
+                        # time_diff_cur = self.cascade_df['time_diff'][idx_cur]
+                        # time_diff_prev = self.cascade_df['time_diff'][idx_cur-1]
+                        #
+                        # # print('Time_diff ratio: ', time_diff_cur/time_diff_prev)
+                        # if time_diff_prev !=0 and (time_diff_cur!=0) and (time_diff_cur/time_diff_prev) > 2:
+                        #     time_diff_ratio_list.append(time_diff_cur/time_diff_prev)
 
-                        # print('Time_diff ratio: ', time_diff_cur/time_diff_prev)
-                        if time_diff_prev !=0 and (time_diff_cur/time_diff_prev) <= 5:
-                            time_diff_ratio_list.append(time_diff_cur/time_diff_prev)
+                        # the second formula pertains to the cause only !!!
 
-        mean_series = np.mean(self.cascade_df['time_diff']) / 2
-        # print(self.cascade_df)
-        startPoint = 0
-        endPoint = 0
-        dnIntervals_effect = []
-        for idx_m in range(len(self.measures)):
-            time_points = self.cascade_df['time_date'].tolist()
+                        # print(self.cascade_df[self.measures[0]][idx_cur+lag], mean_interval)
+                        if self.cascade_df[self.measures[0]][idx_cur+lag] <= 2*mean_interval:
+                            self.dnIntervals_cause_decrease.append((t_series, t_points))
+                            # print('Decrease cause: ', (t_series, t_points))
+                        elif self.cascade_df[self.measures[0]][idx_cur+lag] >= 2*mean_interval:
+                            self.dnIntervals_cause_increase.append((t_series, t_points))
+                            # print('Increase cause: ', (t_series, t_points))
 
-            # check whether the second formula is satisfied
-            # This part is to check whether the feature traces satisfy the
-            # behaviors laid down by STL semantics.
-
-            for t_series in range(len(time_points)):
-                # print('Time point: ', t_series)
-                if t_series + s >= len(time_points):
-                    break
-                for t_points in range(t_series + r, t_series + s):
-                    # print('Start_time: ', t_points)
-
-                    idx_cur = t_series
-                    for idx_cur in range(t_series, t_points):
-                        # print(self.cascade_df[self.measures[0]][idx_cur], mean_series)
-                        if self.cascade_df['time_diff'][idx_cur] <= mean_series:
-                            break
-                    if idx_cur == t_points - 1:
-                        # print('Effect: ', time_points[t_series], time_points[t_points])
-                        dnIntervals_effect.append((t_series, t_points))
-                        # check whether the first formula is satisfied
-            # This part is to check whether the feature traces satisfy the
-            # behaviors laid down by STL semantics.
-            # for t_series in range(len(time_points)):
-            #     if t_series + s>=
 
     def eta_avg(self):
         for idx_measures in range(len(self.measures)):
@@ -257,23 +239,23 @@ if __name__ == '__main__':
                 for idx_sub in range(len(subset)):
                     # print(measures[subset[idx_sub]])
                     cascade_VAR_df[measures[subset[idx_sub]]] = X[idx_sub, :]
-                    
+
                 cnt_mids += 1
                 if True: #cnt_mids == 100:
                     temporal_logic = TLogic(cascade_ts_df, measures)
-                    temporal_logic.dynamic_intervals(5, 15)
+                    temporal_logic.dynamic_intervals(5, 15, 5)
                     # temporal_logic.rules_formulas(50, 150)
                     # temporal_logic.eta_avg()
                 print('Mid: ', cnt_mids)
-                if cnt_mids > 100:
+                if cnt_mids > 10:
                     break
 
     # print(len(time_diff_ratio_list))
-    n, bins, patches = plt.hist(time_diff_ratio_list, 30, facecolor='g')
-    plt.xlabel('Time diff')
-    plt.ylabel('Frequency')
-    # plt.title('Histogram of User activity Times')
-    plt.grid(True)
-    plt.show()
-    # plt.savefig('Cascade_figures/trash/user_activity_histogram.png')
+    # n, bins, patches = plt.hist(time_diff_ratio_list, 30, facecolor='g')
+    # plt.xlabel('Time diff')
+    # plt.ylabel('Frequency')
+    # # plt.title('Histogram of User activity Times')
+    # plt.grid(True)
+    # plt.show()
+    # # plt.savefig('Cascade_figures/trash/user_activity_histogram.png')
 
