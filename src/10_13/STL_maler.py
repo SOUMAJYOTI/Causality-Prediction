@@ -34,12 +34,17 @@ class TLogic:
         self.measures = measures
         self.cascade_df['time_date']= pd.to_datetime(self.cascade_df['time_date'], format='%Y-%m-%d %H:%M:%S')
         self.cascade_df = self.cascade_df.reset_index(drop=True)
-        self.dnIntervals_cause_increase = []
-        self.dnIntervals_cause_decrease = []
+        self.dnIntervals_cause_increase = {}
+        self.dnIntervals_cause_decrease = {}
         self.dnIntervals_effect = {}
+        self.dnIntervals_sig_cause_increase = {}
+        self.dnIntervals_sig_cause_decrease = {}
         for idx in range(len(self.measures)):
             self.dnIntervals_effect[self.measures[idx]] = []
-            self.dnIntervals_cause[self.measures[idx]] = []
+            self.dnIntervals_cause_increase[self.measures[idx]] = []
+            self.dnIntervals_cause_decrease[self.measures[idx]] = []
+            self.dnIntervals_sig_cause_increase[self.measures[idx]] = []
+            self.dnIntervals_sig_cause_decrease[self.measures[idx]] = []
 
     def dynamic_intervals(self, r, s, lag):
         mean_series = np.mean(self.cascade_df[self.measures[0]]) /2
@@ -84,29 +89,49 @@ class TLogic:
 
                         # print(self.cascade_df[self.measures[0]][idx_cur+lag], mean_interval)
                         if self.cascade_df[self.measures[0]][idx_cur+lag] <= 2*mean_interval:
-                            self.dnIntervals_cause_decrease.append((t_series, t_points))
+                            self.dnIntervals_cause_decrease[self.measures[0]].append((t_series, t_points))
                             # print('Decrease cause: ', (t_series, t_points))
                         elif self.cascade_df[self.measures[0]][idx_cur+lag] >= 2*mean_interval:
-                            self.dnIntervals_cause_increase.append((t_series, t_points))
+                            self.dnIntervals_cause_increase[self.measures[0]].append((t_series, t_points))
                             # print('Increase cause: ', (t_series, t_points))
 
 
-    def eta_avg(self):
+    def potential_causes(self, lag):
         for idx_measures in range(len(self.measures)):
-            cause_prime = self.dnIntervals_cause[self.measures[idx_measures]]
-            effect_prime = self.dnIntervals_effect[self.measures[idx_measures]]
-            for idx_cause in range(len(cause_prime)):
-                c_prime = cause_prime[idx_cause]
-                for idx_nest in range(len(self.measures)):
-                    if idx_nest == idx_measures:
-                        continue
-                    cause_second = self.dnIntervals_cause[self.measures[idx_nest]]
-                    effect_second = self.dnIntervals_effect[self.measures[idx_nest]]
+            causes_increase = self.dnIntervals_cause_increase[self.measures[idx_measures]]
+            causes_decrease = self.dnIntervals_cause_decrease[self.measures[idx_measures]]
+            for idx_cause in range(0, len(causes_decrease)):
+                effect_cond_exp = 0
+                c_prime = causes_decrease[idx_cause]
+                effect = 0
+                for idx_cond in range(c_prime[0], c_prime[1]+1):
+                    effect_cond_exp += self.cascade_df['time_diff'][idx_cond+lag]
+                for idx_cond in range(0, c_prime[0]):
+                    effect += self.cascade_df['time_diff'][idx_cond]
+                effect_cond_exp /= (c_prime[1] - c_prime[0])
+                effect /= (c_prime[0])
+                # print(effect, effect_cond_exp)
 
-                    for idx_cause_sec in range(len(cause_second)):
-                        c_second = cause_second[idx_cause_sec]
-                        # if c_second[0] >= c_prime[0] and cause_second[1] <= cause_prime[1]:
+                if effect < effect_cond_exp:
+                    self.dnIntervals_sig_cause_decrease[self.measures[0]].append(causes_decrease[idx_cause])
 
+    def eta_avg(self, lag):
+        for idx_measures in range(len(self.measures)):
+            causes_increase = self.dnIntervals_sig_cause_increase[self.measures[idx_measures]]
+            causes_decrease = self.dnIntervals_sig_cause_decrease[self.measures[idx_measures]]
+            for idx_cause in range(1, len(causes_decrease)):
+                for idx_prev in range(0, idx_cause):
+                    cause_prev = causes_decrease[idx_prev]
+                    effect_sum_excl = self.cascade_df['time_diff'][cause_prev[1]+lag]
+                    for idx_cond in range(cause_prev[0], cause_prev[1]+1):
+                        effect_cond_exp += self.cascade_df['time_diff'][idx_cond]
+                c_prime = causes_decrease[idx_cause]
+                mean_sum_excl = effect_sum_excl / idx_cause
+                effect_sum_incl = effect_sum_excl + self.cascade_df['time_diff'][c_prime[1]+lag]
+                mean_sum_incl = effect_sum_incl /(idx_cause+1)
+
+                eta_avg = (mean_sum_incl - mean_sum_excl) / (idx_cause+1)
+                print(eta_avg)
 
 if __name__ == '__main__':
     measure_file_path = 'F://Github//Causality-Prediction//data//measure_series//inhib//v2'
@@ -243,9 +268,10 @@ if __name__ == '__main__':
                 cnt_mids += 1
                 if True: #cnt_mids == 100:
                     temporal_logic = TLogic(cascade_ts_df, measures)
-                    temporal_logic.dynamic_intervals(5, 15, 5)
+                    temporal_logic.dynamic_intervals(5, 15, 3)
                     # temporal_logic.rules_formulas(50, 150)
-                    # temporal_logic.eta_avg()
+                    temporal_logic.potential_causes(5)
+                    # temporal_logic.eta_avg(5)
                 print('Mid: ', cnt_mids)
                 if cnt_mids > 10:
                     break
