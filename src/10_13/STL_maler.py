@@ -42,7 +42,7 @@ class TLogic:
         inhib_time = time.mktime(time_x.timetuple())
         self.inhib_time = inhib_time
 
-        self.time_intervals = {0:1000, 1:1500, 2:2000, 3:2500, 4: 3000, 5: 3500, 6:4000, 7:4500, 8:6000, 9:6500}
+        self.time_intervals = {0:200, 1:500, 2:1000, 3:1400, 4: 1700, 5: 2000, 6:2300, 7:2600, 8:3000, 9:5000}
         self.cascade_df['time_date']= pd.to_datetime(self.cascade_df['time_date'], format='%Y-%m-%d %H:%M:%S')
         self.cascade_df = self.cascade_df.reset_index(drop=True)
         self.dnIntervals_cause_increase = {}
@@ -158,7 +158,7 @@ class TLogic:
                         if diff < self.time_intervals[t]:
                             eta_intervals[9-t].append(eta_avg)
                             break
-                    # print(diff, eta_avg)
+                    print(diff, eta_avg)
                 except KeyError:
                     break
 
@@ -297,7 +297,7 @@ if __name__ == '__main__':
                 cnt_mids += 1
                 if True: #cnt_mids == 100:
                     temporal_logic = TLogic(cascade_ts_df, inhib_time, measures)
-                    temporal_logic.dynamic_intervals(3, 10, 5)
+                    temporal_logic.dynamic_intervals(5, 10, 5)
                     # temporal_logic.rules_formulas(50, 150)
                     temporal_logic.potential_causes(5)
                     temporal_logic.eta_avg(5)
@@ -314,4 +314,61 @@ if __name__ == '__main__':
     # plt.grid(True)
     # plt.show()
     # # plt.savefig('Cascade_figures/trash/user_activity_histogram.png')
+    #
+    for idx in range(len(eta_intervals)):
+        print(len(eta_intervals[idx]))
+    print(eta_intervals[9][:10])
+    data_to_plot = eta_intervals
+    # Create the box_plots
+    fig = plt.figure(1, figsize=(10, 8))
 
+    # Create an axes instance
+    ax = fig.add_subplot(111)
+
+    # Create the boxplot
+    bp = ax.boxplot(data_to_plot, patch_artist=True)
+
+    third_quartile = [item.get_ydata()[0] for item in bp['whiskers']]
+    quarts = []
+    for idx in range(len(third_quartile)):
+        if not np.isnan(third_quartile[idx]):
+            quarts.append(third_quartile[idx])
+    upper_quart = max(quarts)
+    lower_quart = min(quarts)
+
+    # print(upper_quart, lower_quart)
+
+    for box in bp['boxes']:
+        # change outline color
+        box.set(color='#7570b3', linewidth=2)
+        # change fill color
+        box.set(facecolor='#1b9e77')
+
+    ## change color and linewidth of the whiskers
+    for whisker in bp['whiskers']:
+        whisker.set(color='#7570b3', linewidth=2)
+
+    ## change color and linewidth of the caps
+    for cap in bp['caps']:
+        cap.set(color='#7570b3', linewidth=2)
+
+    ## change color and linewidth of the medians
+    for median in bp['medians']:
+        median.set(color='#b2df8a', linewidth=2)
+
+    ## change the style of fliers and their fill
+    for flier in bp['fliers']:
+        flier.set(marker='o', color='#e7298a', alpha=0.5)
+
+    ax.set_title('Causal Significance')
+    ax.set_xlabel('Interval')
+    # ax.set_ylim([0, 100])
+    # ax.set_xticklabels(titles)
+
+    # dir_save = 'motif_weight_plots/static/4'
+    # if not os.path.exists(dir_save):
+    #     os.makedirs(dir_save)
+    # file_save = dir_save + '/' + 'weight_motif_' + str(m) + '.png'
+    plt.ylim([lower_quart - math.pow(10, int(math.log10(abs(lower_quart)))), upper_quart + math.pow(10, int(math.log10(upper_quart)))])
+    plt.show()
+    plt.close()
