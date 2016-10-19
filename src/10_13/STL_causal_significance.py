@@ -20,7 +20,7 @@ import itertools
 
 time_diff_ratio_list = []
 eta_intervals = [[] for i in range(10)]
-
+eta_avg = {}
 
 class DataProcess:
     def __init__(selfself, mfile, tfile):
@@ -36,10 +36,6 @@ class TLogic:
         self.lag = lag
         self.r = r
         self.s = s
-        self.eta_avg = {}
-
-        for m in self.measures:
-            self.eta_avg[m] = []
 
         # Storing inhib time as mktuple()
         rt_time = str(inhib_time)
@@ -50,9 +46,25 @@ class TLogic:
         inhib_time = time.mktime(time_x.timetuple())
         self.inhib_time = inhib_time
 
-        self.time_intervals = {0:200, 1:500, 2:1000, 3:1400, 4: 1700, 5: 2000, 6:2300, 7:2600, 8:3000, 9:5000}
-        self.cascade_df['time_date']= pd.to_datetime(self.cascade_df['time_date'], format='%Y-%m-%d %H:%M:%S')
+        self.time_intervals = {0:200, 1: 500, 2: 1000, 3:1400, 4: 1700, 5: 2000, 6:2300, 7:2600, 8:3000, 9:5000}
+        self.cascade_df['time_date'] = pd.to_datetime(self.cascade_df['time_date'], format='%Y-%m-%d %H:%M:%S')
         self.cascade_df = self.cascade_df.reset_index(drop=True)
+
+        time_points = self.cascade_df['time_date'].tolist()
+        # for idx in range(len(time_points)):
+        #     rt_time = str(self.cascade_df['time_date'][idx])
+        #     rt_date = rt_time[:10]
+        #     rt_t = rt_time[11:19]
+        #     record_time = rt_date + ' ' + rt_t
+        #     time_x = datetime.datetime.strptime(record_time, '%Y-%m-%d %H:%M:%S')
+        #     cur_time = time.mktime(time_x.timetuple())
+        #
+        #     diff = (self.inhib_time - cur_time) /60
+
+            # for t in range(len(self.time_intervals)):
+            #     if diff < self.time_intervals[t]:
+            #         self.time_interval_points.append()
+
         self.dnIntervals_cause_increase = {}
         self.dnIntervals_cause_decrease = {}
         self.dnIntervals_effect = {}
@@ -110,8 +122,6 @@ class TLogic:
                             break
                             # print('Increase cause: ', (t_series, t_points))
 
-
-
     def potential_causes(self):
         # for idx_measures in range(len(self.measures)):
         #     causes_increase = self.dnIntervals_cause_increase[self.measures[idx_measures]]
@@ -138,12 +148,12 @@ class TLogic:
             eta_avg_val = 0
 
             t_points_prima = []
-            print('Prima cause: ', self.measures[idx_prima])
+            # print('Prima cause: ', self.measures[idx_prima])
             for idx_measures in range(len(self.measures)):
                 t_points_other = []
                 if idx_prima == idx_measures:
                     continue
-                print('Other cause: ', self.measures[idx_measures])
+                # print('Other cause: ', self.measures[idx_measures])
                 exp_effect_given_excl = 0
                 causes_decrease_other = self.dnIntervals_sig_cause_decrease[self.measures[idx_measures]]
 
@@ -180,37 +190,9 @@ class TLogic:
                 eta_avg_val += (exp_effect_given_incl - exp_effect_given_excl)
 
             eta_avg_val /= (len(self.measures)-1)
-            print(eta_avg_val)
+            if eta_avg_val > 0:
+                eta_avg[self.measures[idx_prima]].append(eta_avg_val)
 
-
-                    #
-                    #     for idx_prev in range(0, idx_cause):
-                    #         cause_prev = causes_decrease[idx_prev]
-                    #         effect_sum_excl += np.sum(self.cascade_df['time_diff'][cause_prev[0]+lag: cause_prev[1]+lag])
-                    #
-                    #     cause_prev = causes_decrease[idx_cause]
-                    #     effect_sum_incl = effect_sum_excl + np.sum(self.cascade_df['time_diff'][cause_prev[0]+lag: cause_prev[1]+lag])
-                    #     mean_sum_excl = effect_sum_excl / idx_cause
-                    #     mean_sum_incl = effect_sum_incl /(idx_cause+1)
-                    #
-                    #     eta_avg = (mean_sum_incl - mean_sum_excl) / (idx_cause)
-                    #
-                    #     rt_time = str(self.cascade_df['time_date'][cause_prev[0]])
-                    #     rt_date = rt_time[:10]
-                    #     rt_t = rt_time[11:19]
-                    #     record_time = rt_date + ' ' + rt_t
-                    #     time_x = datetime.datetime.strptime(record_time, '%Y-%m-%d %H:%M:%S')
-                    #     cur_time = time.mktime(time_x.timetuple())
-                    #
-                    #     diff = (self.inhib_time - cur_time) /60
-                    #
-                    #     for t in range(len(self.time_intervals)):
-                    #         if diff < self.time_intervals[t]:
-                    #             eta_intervals[9-t].append(eta_avg)
-                    #             break
-                    #     print(diff, eta_avg)
-                    # except KeyError:
-                    #     break
 
 if __name__ == '__main__':
     measure_file_path = 'F://Github//Causality-Prediction//data//measure_series//inhib//v2'
@@ -244,6 +226,9 @@ if __name__ == '__main__':
     p_values = {}
     critical_values = {}
     granger_cause_count = {}
+
+    for m in measures:
+        eta_avg[m] = []
 
     for L in range(len(measures), len(range(len(measures))) + 1):
         for subset in itertools.combinations(range(len(measures)), L):
@@ -352,73 +337,72 @@ if __name__ == '__main__':
                 temporal_logic.eta_avg_func()
                 print('Mid: ', cnt_mids)
 
-                if cnt_mids > 10:
+                if cnt_mids > 1500:
                     break
 
 
-    # print(len(time_diff_ratio_list))
-    # n, bins, patches = plt.hist(time_diff_ratio_list, 30, facecolor='g')
-    # plt.xlabel('Time diff')
-    # plt.ylabel('Frequency')
-    # # plt.title('Histogram of User activity Times')
-    # plt.grid(True)
-    # plt.show()
-    # # plt.savefig('Cascade_figures/trash/user_activity_histogram.png')
-    #
+    eta_store = [[] for i in range(5)]
+    i=0
+    titles = []
+    for m in eta_avg:
+        eta_store[i] = eta_avg[m]
+        titles.append(str(m))
+        i += 1
+
     # for idx in range(len(eta_intervals)):
     #     print(len(eta_intervals[idx]))
     # print(eta_intervals[9][:10])
-    # data_to_plot = eta_intervals
-    # # Create the box_plots
-    # fig = plt.figure(1, figsize=(10, 8))
-    #
-    # # Create an axes instance
-    # ax = fig.add_subplot(111)
-    #
-    # # Create the boxplot
-    # bp = ax.boxplot(data_to_plot, patch_artist=True)
-    #
-    # third_quartile = [item.get_ydata()[0] for item in bp['whiskers']]
-    # quarts = []
-    # for idx in range(len(third_quartile)):
-    #     if not np.isnan(third_quartile[idx]):
-    #         quarts.append(third_quartile[idx])
-    # upper_quart = max(quarts)
-    # lower_quart = min(quarts)
-    #
-    # # print(upper_quart, lower_quart)
-    #
-    # for box in bp['boxes']:
-    #     # change outline color
-    #     box.set(color='#7570b3', linewidth=2)
-    #     # change fill color
-    #     box.set(facecolor='#1b9e77')
-    #
-    # ## change color and linewidth of the whiskers
-    # for whisker in bp['whiskers']:
-    #     whisker.set(color='#7570b3', linewidth=2)
-    #
-    # ## change color and linewidth of the caps
-    # for cap in bp['caps']:
-    #     cap.set(color='#7570b3', linewidth=2)
-    #
-    # ## change color and linewidth of the medians
-    # for median in bp['medians']:
-    #     median.set(color='#b2df8a', linewidth=2)
-    #
-    # ## change the style of fliers and their fill
-    # for flier in bp['fliers']:
-    #     flier.set(marker='o', color='#e7298a', alpha=0.5)
-    #
-    # ax.set_title('Causal Significance')
-    # ax.set_xlabel('Interval')
-    # # ax.set_ylim([0, 100])
-    # # ax.set_xticklabels(titles)
-    #
-    # # dir_save = 'motif_weight_plots/static/4'
-    # # if not os.path.exists(dir_save):
-    # #     os.makedirs(dir_save)
-    # # file_save = dir_save + '/' + 'weight_motif_' + str(m) + '.png'
-    # plt.ylim([lower_quart - math.pow(10, int(math.log10(abs(lower_quart)))), upper_quart + math.pow(10, int(math.log10(upper_quart)))])
-    # plt.show()
-    # plt.close()
+    data_to_plot = eta_store
+    # Create the box_plots
+    fig = plt.figure(1, figsize=(10, 8))
+
+    # Create an axes instance
+    ax = fig.add_subplot(111)
+
+    # Create the boxplot
+    bp = ax.boxplot(data_to_plot, patch_artist=True)
+
+    third_quartile = [item.get_ydata()[0] for item in bp['whiskers']]
+    quarts = []
+    for idx in range(len(third_quartile)):
+        if not np.isnan(third_quartile[idx]):
+            quarts.append(third_quartile[idx])
+    upper_quart = max(quarts)
+    lower_quart = min(quarts)
+
+    # print(upper_quart, lower_quart)
+
+    for box in bp['boxes']:
+        # change outline color
+        box.set(color='#7570b3', linewidth=2)
+        # change fill color
+        box.set(facecolor='#1b9e77')
+
+    ## change color and linewidth of the whiskers
+    for whisker in bp['whiskers']:
+        whisker.set(color='#7570b3', linewidth=2)
+
+    ## change color and linewidth of the caps
+    for cap in bp['caps']:
+        cap.set(color='#7570b3', linewidth=2)
+
+    ## change color and linewidth of the medians
+    for median in bp['medians']:
+        median.set(color='#b2df8a', linewidth=2)
+
+    ## change the style of fliers and their fill
+    for flier in bp['fliers']:
+        flier.set(marker='o', color='#e7298a', alpha=0.5)
+
+    ax.set_title('Causal Significance')
+    ax.set_xlabel('Interval')
+    # ax.set_ylim([0, 100])
+    ax.set_xticklabels(titles)
+
+    # dir_save = 'motif_weight_plots/static/4'
+    # if not os.path.exists(dir_save):
+    #     os.makedirs(dir_save)
+    # file_save = dir_save + '/' + 'weight_motif_' + str(m) + '.png'
+    plt.ylim([lower_quart - math.pow(10, int(math.log10(abs(lower_quart)))), upper_quart + math.pow(10, int(math.log10(upper_quart)))])
+    plt.show()
+    plt.close()
