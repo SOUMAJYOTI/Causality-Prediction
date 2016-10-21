@@ -91,43 +91,24 @@ class TLogic:
                 # print('Time point: ', t_series)
                 if t_series+self.s >= len(time_points):
                     break
-                mean_interval = np.mean(self.cascade_df[self.measures[idx]][t_series - self.s + self.r:t_series])
-                if self.cascade_df[self.measures[idx]][t_series] < mean_interval:
+                mean_interval_cause = np.mean(self.cascade_df[self.measures[idx]][t_series - self.s + self.r:t_series])
+                if self.cascade_df[self.measures[idx]][t_series] < mean_interval_cause:
                     for t_points in range(t_series+self.r, t_series+self.s):
-                    idx_cur = t_series
-                    for idx_cur in range(t_series, t_points+1):
-                        # print(self.cascade_df[self.measures[0]][idx_cur], mean_series)
-                        if self.cascade_df[self.measures[idx]][idx_cur] <= mean_interval:
-                            break
-                    if idx_cur == t_points:
-                        #the second formula pertains to the effect - not considering it right now !!!
-                        # time_diff_cur = self.cascade_df['time_diff'][idx_cur]
-                        # time_diff_prev = self.cascade_df['time_diff'][idx_cur-1]
-                        #
-                        # # print('Time_diff ratio: ', time_diff_cur/time_diff_prev)
-                        # if time_diff_prev !=0 and (time_diff_cur!=0) and (time_diff_cur/time_diff_prev) > 2:
-                        #     time_diff_ratio_list.append(time_diff_cur/time_diff_prev)
-
-                        # the second formula pertains to the cause only !!!
-
-                        # print(self.cascade_df[self.measures[0]][idx_cur+lag], mean_interval)
-                        if self.cascade_df[self.measures[idx]][idx_cur] <= 2*mean_interval:
+                        mean_interval_effect = np.mean(self.cascade_df['time_diff'][t_points - self.s + self.r:t_points])
+                        if self.cascade_df['time_diff'][t_points] < mean_interval_effect:
                             self.dnIntervals_cause_decrease[self.measures[idx]].append((t_series, t_points))
                             break
-                        elif self.cascade_df[self.measures[idx]][idx_cur] >= 2*mean_interval:
-                            self.dnIntervals_cause_increase[self.measures[idx]].append((t_series, t_points))
-                            break
-                            # print('Increase cause: ', (t_series, t_points))
+
 
     def potential_causes(self):
         # for idx_measures in range(len(self.measures)):
-        #     causes_increase = self.dnIntervals_cause_increase[self.measures[idx_measures]]
+        #     # causes_increase = self.dnIntervals_cause_increase[self.measures[idx_measures]]
         #     causes_decrease = self.dnIntervals_cause_decrease[self.measures[idx_measures]]
         #     for idx_cause in range(0, len(causes_decrease)):
         #         effect_cond_exp = 0
         #         c_prime = causes_decrease[idx_cause]
         #         effect = 0
-        #         effect_cond_exp = self.cascade_df['time_diff'][c_prime+lag]
+        #         effect_cond_exp = self.cascade_df['time_diff'][c_prime+self.lag]
         #         for idx_cond in range(0, c_prime[0]):
         #             effect += self.cascade_df['time_diff'][idx_cond]
         #         effect_cond_exp /= (c_prime[1] - c_prime[0])
@@ -141,6 +122,7 @@ class TLogic:
         # print(self.dnIntervals_cause_decrease)
 
     def eta_avg_func(self):
+        # testing whether E(e|c and x) > E(e|not c and x) for a cause c on effect e.
         for idx_prima in range(len(self.measures)):
             eta_avg_val = 0
 
@@ -334,7 +316,7 @@ if __name__ == '__main__':
                 temporal_logic.eta_avg_func()
                 print('Mid: ', cnt_mids)
 
-                if cnt_mids > 1500:
+                if cnt_mids > 0:
                     break
 
 
