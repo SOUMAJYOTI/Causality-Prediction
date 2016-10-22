@@ -17,10 +17,10 @@ import itertools
 
 time_diff_ratio_list = []
 eta_intervals = [[] for i in range(10)]
-eta_avg = {}
+eta_avg_list = {}
 
 class DataProcess:
-    def __init__(selfself, mfile, tfile):
+    def __init__(self, mfile, tfile):
         measure_file_path = 'F://Github//Causality-Prediction//data//measure_series//inhib//v2'
         steep_inhib_times = pickle.load(
             open('F://Inhibition//VAR_causality//data_files//steep_inhib_times.pickle', 'rb'))
@@ -123,56 +123,13 @@ class TLogic:
     def eta_avg_func(self):
         # testing whether E(e|c and x) > E(e|not c and x) for a cause c on effect e.
         for idx_prima in range(len(self.measures)):
-            print(self.measures[idx_prima])
-            eta_avg_val = 0
-            t_points_prima = []
-            t_points_union = []
-
-            # causes_prima = self.dnIntervals_sig_cause_decrease[self.measures[idx_prima]]
-            # for idx_cause in range(len(causes_prima)):
-            #     t_points_prima.append(causes_prima[idx_cause][0])
-
-            # for idx_others in range(len(self.measures)):
-            #     if idx_others == idx_prima:
-            #         continue
-            #     causes_others = self.dnIntervals_sig_cause_decrease[self.measures[idx_others]]
-            #     for idx_cause in range(len(causes_others)):
-            #         t_points_union.append(causes_others[idx_cause][0])
-            #
-            # t_points_union = list(set(t_points_union))
-            # c_inter_x = list(set(t_points_union).intersection(set(t_points_prima)))
-            # not_c_inter_x = list(set(t_points_union) - set(c_inter_x))
-            #
-            # exp_effect_given_excl = 0
-            # exp_effect_given_incl = 0
-            # cnt = 0
-            # for t in c_inter_x:
-            #     try:
-            #         exp_effect_given_incl += self.cascade_df['time_diff'][t+self.lag]
-            #         cnt += 1
-            #     except KeyError:
-            #         continue
-            # exp_effect_given_excl /= cnt
-            #
-            # cnt = 0
-            # for t in not_c_inter_x:
-            #     try:
-            #         exp_effect_given_excl += self.cascade_df['time_diff'][t+self.lag]
-            #         cnt += 1
-            #     except KeyError:
-            #         continue
-            # exp_effect_given_excl /= cnt
-            #
-            # eta_avg = (- exp_effect_given_incl + exp_effect_given_excl)/(len(t_points_union) - len(t_points_prima))
-            # print(eta_avg)
-
+            # print(self.measures[idx_prima])
             t_points_prima = []
             eta_avg = 0
 
             causes_prima = self.dnIntervals_sig_cause_decrease[self.measures[idx_prima]]
             for idx_cause in range(len(causes_prima)):
                 t_points_prima.append(causes_prima[idx_cause][0])
-
 
             for idx_others in range(len(self.measures)):
                 t_points_union = []
@@ -190,10 +147,11 @@ class TLogic:
                 for t in c_inter_x:
                     try:
                         effect_incl += self.cascade_df['time_diff'][t + self.lag]
-                        cnt+= 1
+                        cnt += 1
                     except KeyError:
                         continue
-                effect_incl /= cnt
+                if cnt != 0:
+                    effect_incl /= cnt
 
                 cnt = 0
                 effect_excl = 0
@@ -203,13 +161,14 @@ class TLogic:
                         cnt += 1
                     except KeyError:
                         continue
-                effect_excl /= cnt
+                if cnt != 0:
+                    effect_excl /= cnt
 
                 eta = (effect_excl - effect_incl)
                 eta_avg += eta
 
             eta_avg /= (len(self.measures) - 1)
-            print(eta_avg)
+            eta_avg_list[self.measures[idx_prima]].append(eta_avg)
 
 if __name__ == '__main__':
     measure_file_path = 'F://Github//Causality-Prediction//data//measure_series//inhib//v2'
@@ -245,7 +204,7 @@ if __name__ == '__main__':
     granger_cause_count = {}
 
     for m in measures:
-        eta_avg[m] = []
+        eta_avg_list[m] = []
 
     for L in range(len(measures), len(range(len(measures))) + 1):
         for subset in itertools.combinations(range(len(measures)), L):
@@ -361,65 +320,65 @@ if __name__ == '__main__':
     eta_store = [[] for i in range(5)]
     i=0
     titles = []
-    for m in eta_avg:
-        eta_store[i] = eta_avg[m]
+    for m in eta_avg_list:
+        eta_store[i] = eta_avg_list[m]
         titles.append(str(m))
         i += 1
 
     # for idx in range(len(eta_intervals)):
     #     print(len(eta_intervals[idx]))
     # print(eta_intervals[9][:10])
-    # data_to_plot = eta_store
-    # # Create the box_plots
-    # fig = plt.figure(1, figsize=(10, 8))
-    #
-    # # Create an axes instance
-    # ax = fig.add_subplot(111)
-    #
-    # # Create the boxplot
-    # bp = ax.boxplot(data_to_plot, patch_artist=True)
-    #
-    # third_quartile = [item.get_ydata()[0] for item in bp['whiskers']]
-    # quarts = []
-    # for idx in range(len(third_quartile)):
-    #     if not np.isnan(third_quartile[idx]):
-    #         quarts.append(third_quartile[idx])
-    # upper_quart = max(quarts)
-    # lower_quart = min(quarts)
-    #
-    # # print(upper_quart, lower_quart)
-    #
-    # for box in bp['boxes']:
-    #     # change outline color
-    #     box.set(color='#7570b3', linewidth=2)
-    #     # change fill color
-    #     box.set(facecolor='#1b9e77')
-    #
-    # ## change color and linewidth of the whiskers
-    # for whisker in bp['whiskers']:
-    #     whisker.set(color='#7570b3', linewidth=2)
-    #
-    # ## change color and linewidth of the caps
-    # for cap in bp['caps']:
-    #     cap.set(color='#7570b3', linewidth=2)
-    #
-    # ## change color and linewidth of the medians
-    # for median in bp['medians']:
-    #     median.set(color='#b2df8a', linewidth=2)
-    #
-    # ## change the style of fliers and their fill
-    # for flier in bp['fliers']:
-    #     flier.set(marker='o', color='#e7298a', alpha=0.5)
-    #
-    # ax.set_title('Causal Significance')
-    # ax.set_xlabel('Interval')
-    # # ax.set_ylim([0, 100])
-    # ax.set_xticklabels(titles)
-    #
-    # # dir_save = 'motif_weight_plots/static/4'
-    # # if not os.path.exists(dir_save):
-    # #     os.makedirs(dir_save)
-    # # file_save = dir_save + '/' + 'weight_motif_' + str(m) + '.png'
-    # plt.ylim([lower_quart - math.pow(10, int(math.log10(abs(lower_quart)))), upper_quart + math.pow(10, int(math.log10(upper_quart)))])
-    # plt.show()
-    # plt.close()
+    data_to_plot = eta_store
+    # Create the box_plots
+    fig = plt.figure(1, figsize=(10, 8))
+
+    # Create an axes instance
+    ax = fig.add_subplot(111)
+
+    # Create the boxplot
+    bp = ax.boxplot(data_to_plot, patch_artist=True)
+
+    third_quartile = [item.get_ydata()[0] for item in bp['whiskers']]
+    quarts = []
+    for idx in range(len(third_quartile)):
+        if not np.isnan(third_quartile[idx]):
+            quarts.append(third_quartile[idx])
+    upper_quart = max(quarts)
+    lower_quart = min(quarts)
+
+    # print(upper_quart, lower_quart)
+
+    for box in bp['boxes']:
+        # change outline color
+        box.set(color='#7570b3', linewidth=2)
+        # change fill color
+        box.set(facecolor='#1b9e77')
+
+    ## change color and linewidth of the whiskers
+    for whisker in bp['whiskers']:
+        whisker.set(color='#7570b3', linewidth=2)
+
+    ## change color and linewidth of the caps
+    for cap in bp['caps']:
+        cap.set(color='#7570b3', linewidth=2)
+
+    ## change color and linewidth of the medians
+    for median in bp['medians']:
+        median.set(color='#b2df8a', linewidth=2)
+
+    ## change the style of fliers and their fill
+    for flier in bp['fliers']:
+        flier.set(marker='o', color='#e7298a', alpha=0.5)
+
+    ax.set_title('Causal Significance')
+    ax.set_xlabel('Interval')
+    # ax.set_ylim([0, 100])
+    ax.set_xticklabels(titles)
+
+    # dir_save = 'motif_weight_plots/static/4'
+    # if not os.path.exists(dir_save):
+    #     os.makedirs(dir_save)
+    # file_save = dir_save + '/' + 'weight_motif_' + str(m) + '.png'
+    plt.ylim([lower_quart - math.pow(10, int(math.log10(abs(lower_quart)))), upper_quart + math.pow(10, int(math.log10(upper_quart)))])
+    plt.show()
+    plt.close()
