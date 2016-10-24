@@ -23,7 +23,7 @@
       <file leaf-file-name="temporal_logic_test.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/09_24/temporal_logic_test.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="130">
+            <state relative-caret-position="220">
               <caret line="29" column="30" selection-start-line="29" selection-start-column="30" selection-end-line="29" selection-end-column="30" />
               <folding>
                 <element signature="e#490#759#0" expanded="false" />
@@ -35,8 +35,8 @@
       <file leaf-file-name="STL_maler.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/10_13/STL_maler.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="360">
-              <caret line="265" column="44" selection-start-line="265" selection-start-column="44" selection-end-line="265" selection-end-column="44" />
+            <state relative-caret-position="22">
+              <caret line="127" column="0" selection-start-line="127" selection-start-column="0" selection-end-line="127" selection-end-column="0" />
               <folding>
                 <element signature="e#557#826#0" expanded="false" />
               </folding>
@@ -44,11 +44,31 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="STL_causal_significance.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="STL_causal_significance.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/10_21/STL_causal_significance.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="25">
-              <caret line="204" column="0" selection-start-line="204" selection-start-column="0" selection-end-line="204" selection-end-column="0" />
+            <state relative-caret-position="636">
+              <caret line="177" column="55" selection-start-line="177" selection-start-column="55" selection-end-line="177" selection-end-column="55" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="STL_kleinberg_intervals.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/10_21/STL_kleinberg_intervals.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="132">
+              <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="STL_kleinberg_maler.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/10_21/STL_kleinberg_maler.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="198">
+              <caret line="24" column="37" selection-start-line="24" selection-start-column="37" selection-end-line="24" selection-end-column="37" />
               <folding />
             </state>
           </provider>
@@ -86,6 +106,8 @@
         <option value="$PROJECT_DIR$/src/10_13/STL_maler.py" />
         <option value="$PROJECT_DIR$/src/10_13/STL_causal_significance.py" />
         <option value="$PROJECT_DIR$/src/10_21/STL_causal_significance.py" />
+        <option value="$PROJECT_DIR$/src/10_21/STL_kleinberg_intervals.py" />
+        <option value="$PROJECT_DIR$/src/10_21/STL_kleinberg_maler.py" />
       </list>
     </option>
   </component>
@@ -120,8 +142,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -183,10 +203,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="10_13" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -316,6 +332,8 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scratches" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -328,7 +346,7 @@
       <recent name="F:\Github\Causality-Prediction\data\measure_series\inhib\v2" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.STL_causal_significance (1)">
+  <component name="RunManager" selected="Python.STL_kleinberg_intervals">
     <configuration default="false" name="temporal_logic_test" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -393,6 +411,23 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="Causality-Prediction" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/10_21/STL_causal_significance.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="STL_kleinberg_intervals" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/10_21" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="Causality-Prediction" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/10_21/STL_kleinberg_intervals.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -531,18 +566,20 @@
       <option name="USE_KEYWORD" value="false" />
       <method />
     </configuration>
-    <list size="4">
+    <list size="5">
       <item index="0" class="java.lang.String" itemvalue="Python.temporal_logic_test" />
       <item index="1" class="java.lang.String" itemvalue="Python.STL_maler" />
       <item index="2" class="java.lang.String" itemvalue="Python.STL_causal_significance" />
       <item index="3" class="java.lang.String" itemvalue="Python.STL_causal_significance (1)" />
+      <item index="4" class="java.lang.String" itemvalue="Python.STL_kleinberg_intervals" />
     </list>
     <recent_temporary>
-      <list size="4">
-        <item index="0" class="java.lang.String" itemvalue="Python.STL_causal_significance (1)" />
-        <item index="1" class="java.lang.String" itemvalue="Python.STL_causal_significance" />
-        <item index="2" class="java.lang.String" itemvalue="Python.STL_maler" />
-        <item index="3" class="java.lang.String" itemvalue="Python.temporal_logic_test" />
+      <list size="5">
+        <item index="0" class="java.lang.String" itemvalue="Python.STL_kleinberg_intervals" />
+        <item index="1" class="java.lang.String" itemvalue="Python.STL_causal_significance (1)" />
+        <item index="2" class="java.lang.String" itemvalue="Python.STL_causal_significance" />
+        <item index="3" class="java.lang.String" itemvalue="Python.STL_maler" />
+        <item index="4" class="java.lang.String" itemvalue="Python.temporal_logic_test" />
       </list>
     </recent_temporary>
   </component>
@@ -566,12 +603,12 @@
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.13072917" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.20364584" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.20636663" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22612514" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -603,6 +640,82 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/src/09_24/temporal_logic_test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="638">
+          <caret line="29" column="30" selection-start-line="29" selection-start-column="30" selection-end-line="29" selection-end-column="30" />
+          <folding>
+            <element signature="e#490#759#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/10_13/STL_maler.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5830">
+          <caret line="265" column="44" selection-start-line="265" selection-start-column="44" selection-end-line="265" selection-end-column="44" />
+          <folding>
+            <element signature="e#557#826#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/10_21/STL_causal_significance.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utilities/eta_effect.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="198">
+          <caret line="10" column="8" selection-start-line="10" selection-start-column="8" selection-end-line="10" selection-end-column="8" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/09_24/temporal_logic_test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="638">
+          <caret line="29" column="30" selection-start-line="29" selection-start-column="30" selection-end-line="29" selection-end-column="30" />
+          <folding>
+            <element signature="e#490#759#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/10_13/STL_maler.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5830">
+          <caret line="265" column="44" selection-start-line="265" selection-start-column="44" selection-end-line="265" selection-end-column="44" />
+          <folding>
+            <element signature="e#557#826#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/10_21/STL_causal_significance.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utilities/eta_effect.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="198">
+          <caret line="10" column="8" selection-start-line="10" selection-start-column="8" selection-end-line="10" selection-end-column="8" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/09_24/temporal_logic_test.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -783,9 +896,16 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/10_13/STL_causal_significance.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="348">
+          <caret line="98" column="53" selection-start-line="98" selection-start-column="53" selection-end-line="98" selection-end-column="53" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/09_24/temporal_logic_test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="130">
+        <state relative-caret-position="220">
           <caret line="29" column="30" selection-start-line="29" selection-start-column="30" selection-end-line="29" selection-end-column="30" />
           <folding>
             <element signature="e#490#759#0" expanded="false" />
@@ -793,30 +913,36 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/10_13/STL_causal_significance.py">
+    <entry file="file://$PROJECT_DIR$/src/10_21/STL_causal_significance.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="348">
-          <caret line="98" column="53" selection-start-line="98" selection-start-column="53" selection-end-line="98" selection-end-column="53" />
-          <folding>
-            <element signature="e#437#706#0" expanded="false" />
-          </folding>
+        <state relative-caret-position="636">
+          <caret line="177" column="55" selection-start-line="177" selection-start-column="55" selection-end-line="177" selection-end-column="55" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/10_13/STL_maler.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="265" column="44" selection-start-line="265" selection-start-column="44" selection-end-line="265" selection-end-column="44" />
+        <state relative-caret-position="22">
+          <caret line="127" column="0" selection-start-line="127" selection-start-column="0" selection-end-line="127" selection-end-column="0" />
           <folding>
             <element signature="e#557#826#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/10_21/STL_causal_significance.py">
+    <entry file="file://$PROJECT_DIR$/src/10_21/STL_kleinberg_intervals.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="25">
-          <caret line="204" column="0" selection-start-line="204" selection-start-column="0" selection-end-line="204" selection-end-column="0" />
+        <state relative-caret-position="132">
+          <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/10_21/STL_kleinberg_maler.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="198">
+          <caret line="24" column="37" selection-start-line="24" selection-start-column="37" selection-end-line="24" selection-end-column="37" />
           <folding />
         </state>
       </provider>

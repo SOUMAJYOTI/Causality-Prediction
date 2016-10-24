@@ -115,7 +115,7 @@ class TLogic:
                 if self.cascade_df[self.measures[idx]][t_series] < mean_interval_cause:
                     for t_points in range(t_series+self.r, t_series+self.s):
                         mean_interval_effect = np.mean(self.cascade_df['time_diff'][t_points - self.s + self.r:t_points])
-                        if self.cascade_df['time_diff'][t_points] > self.k*mean_interval_effect:
+                        if self.cascade_df['time_diff'][t_points] < self.k*mean_interval_effect:
                             if self.time_intervals_list[t_series] not in self.dnIntervals_effect[self.measures[idx]]:
                                 self.dnIntervals_effect[self.measures[idx]][self.time_intervals_list[t_series]] = []
 
@@ -145,6 +145,7 @@ class TLogic:
 
     def eta_avg_func(self):
         # testing whether E(e|c and x) > E(e|not c and x) for a cause c on effect e.
+        for t_int in self.time_intervals:
             for idx_prima in range(len(self.measures)):
                 # print(self.measures[idx_prima])
                 t_points_prima = []
@@ -193,7 +194,7 @@ class TLogic:
                     if cnt != 0:
                         effect_excl /= cnt
 
-                    eta = (effect_excl - effect_incl)
+                    eta = (effect_incl - effect_excl)
                     eta_avg += eta
 
                 eta_avg /= (len(self.measures) - 1)
@@ -345,68 +346,72 @@ if __name__ == '__main__':
                 temporal_logic.eta_avg_func()
                 print('Mid: ', cnt_mids)
 
-                if cnt_mids > 15:
+                if cnt_mids > 1500:
                     break
 
-    eta_store = [[] for i in range(5)]
-    titles = []
-    for idx in range(len(measures)):
-        eta_store[idx] = eta_avg_list[measures[idx]]
-        titles.append(str(measures[idx]))
+    for idx_m in range(len(measures)):
+    #    eta_store[idx] = eta_avg_list[measures[idx]]
+    #    titles.append(str(measures[idx]))
+        eta_store = [[] for i in range(10)]
+        titles = []
 
-    # for idx in range(len(eta_intervals)):
-    #     print(len(eta_intervals[idx]))
-    # print(eta_intervals[9][:10])
-    data_to_plot = eta_store
-    # Create the box_plots
-    fig = plt.figure(1, figsize=(10, 8))
+        for t in range(10):
+            try:
+                eta_store[t] = eta_avg_list[measures[idx_m]][9-t]
+            except KeyError:
+                eta_store[9 - t] = [0]
+            titles.append('I' + str(t))
 
-    # Create an axes instance
-    ax = fig.add_subplot(111)
+        data_to_plot = eta_store
+        # Create the box_plots
+        fig = plt.figure(1, figsize=(10, 8))
 
-    # Create the boxplot
-    bp = ax.boxplot(data_to_plot, patch_artist=True)
+        # Create an axes instance
+        ax = fig.add_subplot(111)
 
-    third_quartile = [item.get_ydata()[0] for item in bp['whiskers']]
-    quarts = []
-    for idx in range(len(third_quartile)):
-        if not np.isnan(third_quartile[idx]):
-            quarts.append(third_quartile[idx])
-    upper_quart = max(quarts)
-    lower_quart = min(quarts)
+        # Create the boxplot
+        bp = ax.boxplot(data_to_plot, patch_artist=True)
 
-    # print(upper_quart, lower_quart)
+        third_quartile = [item.get_ydata()[0] for item in bp['whiskers']]
+        quarts = []
+        for idx in range(len(third_quartile)):
+            if not np.isnan(third_quartile[idx]):
+                quarts.append(third_quartile[idx])
+        upper_quart = max(quarts)
+        lower_quart = min(quarts)
 
-    for box in bp['boxes']:
-        # change outline color
-        box.set(color='#7570b3', linewidth=2)
-        # change fill color
-        box.set(facecolor='#1b9e77')
+        # print(upper_quart, lower_quart)
 
-    ## change color and linewidth of the whiskers
-    for whisker in bp['whiskers']:
-        whisker.set(color='#7570b3', linewidth=2)
+        for box in bp['boxes']:
+            # change outline color
+            box.set(color='#7570b3', linewidth=2)
+            # change fill color
+            box.set(facecolor='#1b9e77')
 
-    ## change color and linewidth of the caps
-    for cap in bp['caps']:
-        cap.set(color='#7570b3', linewidth=2)
+        ## change color and linewidth of the whiskers
+        for whisker in bp['whiskers']:
+            whisker.set(color='#7570b3', linewidth=2)
 
-    ## change color and linewidth of the medians
-    for median in bp['medians']:
-        median.set(color='#b2df8a', linewidth=2)
-    ## change the style of fliers and their fill
-    for flier in bp['fliers']:
-        flier.set(marker='o', color='#e7298a', alpha=0.5)
+        ## change color and linewidth of the caps
+        for cap in bp['caps']:
+            cap.set(color='#7570b3', linewidth=2)
 
-    ax.set_title('Causal Significance')
-    ax.set_xlabel('Interval')
-    # ax.set_ylim([0, 100])
-    ax.set_xticklabels(titles)
+        ## change color and linewidth of the medians
+        for median in bp['medians']:
+            median.set(color='#b2df8a', linewidth=2)
+        ## change the style of fliers and their fill
+        for flier in bp['fliers']:
+            flier.set(marker='o', color='#e7298a', alpha=0.5)
 
-    dir_save = '../../plots/causal_significance/10_22/decrease_increase'
-    if not os.path.exists(dir_save):
-        os.makedirs(dir_save)
-    file_save = dir_save + '/' + 'r_2_s_5_k_2' + '.png'
-    plt.ylim([lower_quart - 2*math.pow(10, int(math.log10(abs(lower_quart)))), 2*upper_quart + math.pow(10, int(math.log10(upper_quart)))])
-    plt.savefig(file_save)
-    plt.close()
+        ax.set_title('Causal Significance')
+        ax.set_xlabel('Interval')
+        # ax.set_ylim([0, 100])
+        ax.set_xticklabels(titles)
+
+        dir_save = '../../plots/causal_significance/10_23/decrease_decrease/' + str(measures[idx_m])
+        if not os.path.exists(dir_save):
+            os.makedirs(dir_save)
+        file_save = dir_save + '/' + 'r_2_s_5_k_2' + '.png'
+        plt.ylim([lower_quart - 2*math.pow(10, int(math.log10(abs(lower_quart)))), 2*upper_quart + math.pow(10, int(math.log10(upper_quart)))])
+        plt.savefig(file_save)
+        plt.close()
