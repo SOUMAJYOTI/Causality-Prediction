@@ -52,27 +52,13 @@ class TLogic:
         self.time_intervals_list = {}
         self.time_points = self.cascade_df['time_date'].tolist()
 
-        for idx in range(len(self.time_points)):
-            rt_time = str(self.cascade_df['time_date'][idx])
-            rt_date = rt_time[:10]
-            rt_t = rt_time[11:19]
-            record_time = rt_date + ' ' + rt_t
-            time_x = datetime.datetime.strptime(record_time, '%Y-%m-%d %H:%M:%S')
-            cur_time = time.mktime(time_x.timetuple())
-
-            diff = (self.inhib_time - cur_time) /60
-
-            for t in range(len(self.time_intervals)):
-                if diff < self.time_intervals[t]:
-                    self.time_intervals_list[idx] = t
-                    break
 
         self.dnIntervals_effect = {}
         self.dnIntervals_sig_effect = {}
 
         for idx in range(len(self.measures)):
-            self.dnIntervals_effect[self.measures[idx]] = {}
-            self.dnIntervals_sig_effect[self.measures[idx]] = {}
+            self.dnIntervals_effect[self.measures[idx]] = []
+            self.dnIntervals_sig_effect[self.measures[idx]] = []
 
     def test_stationarity(self, timeseries, name):
 
@@ -116,10 +102,7 @@ class TLogic:
                     for t_points in range(t_series+self.r, t_series+self.s):
                         mean_interval_effect = np.mean(self.cascade_df['time_diff'][t_points - self.s + self.r:t_points])
                         if self.cascade_df['time_diff'][t_points] > self.k*mean_interval_effect:
-                            if self.time_intervals_list[t_series] not in self.dnIntervals_effect[self.measures[idx]]:
-                                self.dnIntervals_effect[self.measures[idx]][self.time_intervals_list[t_series]] = []
-
-                            self.dnIntervals_effect[self.measures[idx]][self.time_intervals_list[t_series]].append((t_series, t_points))
+                            self.dnIntervals_effect[self.measures[idx]].append((t_series, t_points))
                             break
 
     def potential_causes(self):
@@ -151,7 +134,7 @@ class TLogic:
                 eta_avg = 0
 
                 try:
-                    causes_prima = self.dnIntervals_sig_effect[self.measures[idx_prima]][t_int]
+                    causes_prima = self.dnIntervals_sig_effect[self.measures[idx_prima]]
                 except KeyError:
                     continue
                 for idx_cause in range(len(causes_prima)):
@@ -162,7 +145,7 @@ class TLogic:
                     if idx_others == idx_prima:
                         continue
                     try:
-                        causes_others = self.dnIntervals_sig_effect[self.measures[idx_others]][t_int]
+                        causes_others = self.dnIntervals_sig_effect[self.measures[idx_others]]
                     except KeyError:
                         continue
                     for idx_cause in range(len(causes_others)):
@@ -193,13 +176,11 @@ class TLogic:
                     if cnt != 0:
                         effect_excl /= cnt
 
-                    eta = (effect_excl - effect_incl)
+                    eta = (effect_incl - effect_excl)
                     eta_avg += eta
 
                 eta_avg /= (len(self.measures) - 1)
-                if t_int not in eta_avg_list[self.measures[idx_prima]]:
-                    eta_avg_list[self.measures[idx_prima]][t_int] = []
-                eta_avg_list[self.measures[idx_prima]][t_int].append(eta_avg)
+                eta_avg_list[self.measures[idx_prima]].append(eta_avg)
         # print(eta_avg_list)
 
 if __name__ == '__main__':
@@ -236,7 +217,7 @@ if __name__ == '__main__':
     granger_cause_count = {}
 
     for m in measures:
-        eta_avg_list[m] = {}
+        eta_avg_list[m] = []
 
     for L in range(len(measures), len(range(len(measures))) + 1):
         for subset in itertools.combinations(range(len(measures)), L):
@@ -338,14 +319,14 @@ if __name__ == '__main__':
                     cascade_VAR_df[measures[subset[idx_sub]]] = X[idx_sub, :]
 
                 cnt_mids += 1
-                temporal_logic = TLogic(cascade_ts_df, mid, inhib_time, measures, 2, 2, 5, 2)
+                temporal_logic = TLogic(cascade_ts_df, mid, inhib_time, measures, 2, 2, 5, 5)
                 temporal_logic.dynamic_intervals()
                 # temporal_logic.rules_formulas(50, 150)
                 temporal_logic.potential_causes()
                 temporal_logic.eta_avg_func()
                 print('Mid: ', cnt_mids)
 
-                if cnt_mids > 15:
+                if cnt_mids > 1500:
                     break
 
     eta_store = [[] for i in range(5)]
@@ -359,7 +340,7 @@ if __name__ == '__main__':
     # print(eta_intervals[9][:10])
     data_to_plot = eta_store
     # Create the box_plots
-    fig = plt.figure(1, figsize=(10, 8))
+    fig = plt.figure(1, figsize=(15, 12))
 
     # Create an axes instance
     ax = fig.add_subplot(111)
@@ -398,15 +379,15 @@ if __name__ == '__main__':
     for flier in bp['fliers']:
         flier.set(marker='o', color='#e7298a', alpha=0.5)
 
-    ax.set_title('Causal Significance')
-    ax.set_xlabel('Interval')
+    ax.set_title('Causal Significance: r=2, s=5, k=5', size=30)
+    ax.set_xlabel('Features', size=30)
     # ax.set_ylim([0, 100])
-    ax.set_xticklabels(titles)
+    ax.set_xticklabels(titles, size=30)
 
-    dir_save = '../../plots/causal_significance/10_22/decrease_increase'
+    dir_save = '../../plots/causal_significance/10_24/decrease_increase'
     if not os.path.exists(dir_save):
         os.makedirs(dir_save)
-    file_save = dir_save + '/' + 'r_2_s_5_k_2' + '.png'
+    file_save = dir_save + '/' + 'r_2_s_5_k_5' + '.png'
     plt.ylim([lower_quart - 2*math.pow(10, int(math.log10(abs(lower_quart)))), 2*upper_quart + math.pow(10, int(math.log10(upper_quart)))])
     plt.savefig(file_save)
     plt.close()

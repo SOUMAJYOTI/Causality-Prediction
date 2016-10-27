@@ -339,7 +339,7 @@ if __name__ == '__main__':
                     cascade_VAR_df[measures[subset[idx_sub]]] = X[idx_sub, :]
 
                 cnt_mids += 1
-                temporal_logic = TLogic(cascade_ts_df, mid, inhib_time, measures, 2, 2, 5, 2)
+                temporal_logic = TLogic(cascade_ts_df, mid, inhib_time, measures, 2, 2, 5, 5)
                 temporal_logic.dynamic_intervals()
                 # temporal_logic.rules_formulas(50, 150)
                 temporal_logic.potential_causes()
@@ -362,9 +362,19 @@ if __name__ == '__main__':
                 eta_store[9 - t] = [0]
             titles.append('I' + str(t))
 
+        max_t = -1
+        for t in range(10):
+            max_temp = max(eta_store[t])
+            if max_temp > max_t:
+                max_t = max_temp
+
+        for t in range(10):
+            for idx in range(len(eta_store[t])):
+                eta_store[t][idx] /= max_t
+
         data_to_plot = eta_store
         # Create the box_plots
-        fig = plt.figure(1, figsize=(10, 8))
+        fig = plt.figure(1, figsize=(15, 12))
 
         # Create an axes instance
         ax = fig.add_subplot(111)
@@ -403,15 +413,15 @@ if __name__ == '__main__':
         for flier in bp['fliers']:
             flier.set(marker='o', color='#e7298a', alpha=0.5)
 
-        ax.set_title('Causal Significance')
-        ax.set_xlabel('Interval')
+        ax.set_title('Causal Significance: r=2, s=5, k=5', size=30)
+        ax.set_xlabel('Intervals', size=30)
         # ax.set_ylim([0, 100])
         ax.set_xticklabels(titles)
 
-        dir_save = '../../plots/causal_significance/10_23/decrease_decrease/' + str(measures[idx_m])
+        dir_save = '../../plots/causal_significance/10_24/decrease_decrease/' + str(measures[idx_m])
         if not os.path.exists(dir_save):
             os.makedirs(dir_save)
-        file_save = dir_save + '/' + 'r_2_s_5_k_2' + '.png'
+        file_save = dir_save + '/' + 'r_2_s_5_k_5' + '.png'
         plt.ylim([lower_quart - 2*math.pow(10, int(math.log10(abs(lower_quart)))), 2*upper_quart + math.pow(10, int(math.log10(upper_quart)))])
         plt.savefig(file_save)
         plt.close()
