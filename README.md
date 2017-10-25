@@ -13,3 +13,5 @@ Non-parametric causality has been studied in the form of propositional
 connectives and boolean logical operators to define causal
 relationships between different features and the response variable and hnece address the 
 above shortcomings.
+
+The code demonstrates an example of using the Kleinger causality framework used in "The Temporal Logic of Causal Structures" by Smantha Kleinberg et. al 2012. The code and ideas are entirely mine although adopted from that paper and in no way is an authority on the concept used in that paper.
